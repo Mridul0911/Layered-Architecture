@@ -1,3 +1,0 @@
-com/thinking/machines/pl/DesignationModel.java
- com.thinking.machines.hr.pl.model.DesignationModel
- com.thinking.machines.hr.pl.model.DesignationModel$1
