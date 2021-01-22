@@ -9,6 +9,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
+import java.io.*;
 public class DesignationUI extends JFrame implements DocumentListener,ListSelectionListener
 { 
 private JLabel titleLabel;
@@ -23,6 +24,13 @@ private Container container;
 private DesignationPanel designationPanel;
 private enum MODE{VIEW,ADD,EDIT,DELETE,EXPORT_TO_PDF};
 private MODE mode;
+private ImageIcon logoIcon;
+private ImageIcon addIcon;
+private ImageIcon editIcon;
+private ImageIcon deleteIcon;
+private ImageIcon cancelIcon;
+private ImageIcon saveIcon;
+private ImageIcon pdfIcon;
 public DesignationUI()
 {
 initComponents();
@@ -33,11 +41,19 @@ designationPanel.setViewMode();
 }
 private void initComponents()
 {
+logoIcon=new ImageIcon(this.getClass().getResource("/icons/logo_icon.png"));
+addIcon=new ImageIcon(this.getClass().getResource("/icons/add_icon.png"));
+editIcon=new ImageIcon(this.getClass().getResource("/icons/edit_icon.png"));
+cancelIcon=new ImageIcon(this.getClass().getResource("/icons/cancel_icon.png"));
+saveIcon=new ImageIcon(this.getClass().getResource("/icons/save_icon.png"));
+deleteIcon=new ImageIcon(this.getClass().getResource("/icons/delete_icon.png"));
+pdfIcon=new ImageIcon(this.getClass().getResource("/icons/pdf_icon.png"));
+setIconImage(logoIcon.getImage());
 designationModel=new DesignationModel();
 titleLabel=new JLabel("Designations");
 searchLabel=new JLabel("Search");
 searchTextField=new JTextField();
-clearSearchTextFieldButton=new JButton("X");
+clearSearchTextFieldButton=new JButton(cancelIcon);
 searchErrorLabel=new JLabel("Not found");
 designationTable=new JTable(designationModel);
 scrollPane=new JScrollPane(designationTable,ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -233,13 +249,13 @@ designation=null;
 titleCaptionLabel=new JLabel("Designation");
 titleLabel=new JLabel("");
 titleTextField=new JTextField();
-clearTitleTextFieldButton=new JButton("x");
+clearTitleTextFieldButton=new JButton(cancelIcon);
 buttonsPanel=new JPanel();
-addButton=new JButton("A");
-editButton=new JButton("E");
-cancelButton=new JButton("C");
-deleteButton=new JButton("D");
-exportToPDFButton=new JButton("E");
+addButton=new JButton(addIcon);
+editButton=new JButton(editIcon);
+cancelButton=new JButton(cancelIcon);
+deleteButton=new JButton(deleteIcon);
+exportToPDFButton=new JButton(pdfIcon);
 }
 private void setAppearance()
 {
@@ -396,6 +412,46 @@ JOptionPane.showMessageDialog(this,blException.getException("title"));
 }
 private void addListeners()
 {
+this.exportToPDFButton.addActionListener(new ActionListener(){
+public void actionPerformed(ActionEvent ev)
+{
+JFileChooser jfc=new JFileChooser();
+jfc.setCurrentDirectory(new File("."));
+int selectedOption=jfc.showSaveDialog(DesignationUI.this);
+if(selectedOption==JFileChooser.APPROVE_OPTION)
+{
+try
+{
+File selectedFile=jfc.getSelectedFile();
+String pdfFile=selectedFile.getAbsolutePath();
+if(pdfFile.endsWith(".")) pdfFile+="pdf";
+else if(pdfFile.endsWith(".pdf")==false) pdfFile+=".pdf";
+File file=new File(pdfFile);
+File parent=new File(file.getParent());
+if(parent.exists()==false || parent.isDirectory()==false)
+if(new File(file.getParent()).exists()==false)
+{
+JOptionPane.showMessageDialog(DesignationUI.this,"Incorrect path : "+file.getAbsolutePath());
+return;  
+}
+designationModel.exportToPDF(file);
+JOptionPane.showMessageDialog(DesignationUI.this,"Data exported to "+file.getAbsolutePath());
+}catch(BLException blException)
+{
+if(blException.hasGenericException())
+{
+JOptionPane.showMessageDialog(DesignationUI.this,blException.getGenericException());
+}
+}
+catch(Exception e)
+{
+System.out.println(e);
+}
+}
+}
+});
+
+
 this.addButton.addActionListener(new ActionListener(){
 public void actionPerformed(ActionEvent ev)
 {
@@ -412,7 +468,6 @@ setViewMode();
 }
 }
 });
-
 this.editButton.addActionListener(new ActionListener(){
 public void actionPerformed(ActionEvent ev)
 {
@@ -435,21 +490,25 @@ public void actionPerformed(ActionEvent ev)
 setViewMode();
 }
 });
-
 this.deleteButton.addActionListener(new ActionListener(){
 public void actionPerformed(ActionEvent ev)
 {
 setDeleteMode();
 }
 });
-
-
+clearTitleTextFieldButton.addActionListener(new ActionListener(){
+public void actionPerformed(ActionEvent ev)
+{
+titleTextField.setText("");
+titleTextField.requestFocus();
+} 
+});
 }
 void setViewMode()
 {
 DesignationUI.this.setViewMode();
-this.addButton.setText("A");
-this.editButton.setText("E");
+this.addButton.setIcon(addIcon);
+this.editButton.setIcon(editIcon);
 this.titleTextField.setVisible(false);
 this.titleLabel.setVisible(true);
 this.addButton.setEnabled(true);
@@ -475,7 +534,7 @@ this.titleTextField.setText("");
 this.titleLabel.setVisible(false);
 this.clearTitleTextFieldButton.setVisible(true);
 this.titleTextField.setVisible(true);
-addButton.setText("S");
+addButton.setIcon(saveIcon);
 editButton.setEnabled(false);
 cancelButton.setEnabled(true);
 deleteButton.setEnabled(false);
@@ -497,7 +556,7 @@ addButton.setEnabled(false);
 cancelButton.setEnabled(true);
 deleteButton.setEnabled(false);
 exportToPDFButton.setEnabled(false);
-editButton.setText("U");
+editButton.setIcon(saveIcon);
 }
 void setDeleteMode()
 {
