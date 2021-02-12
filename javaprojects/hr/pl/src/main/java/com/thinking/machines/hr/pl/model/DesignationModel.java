@@ -14,7 +14,6 @@ import com.itextpdf.layout.*;
 import com.itextpdf.layout.element.*;
 import com.itextpdf.layout.property.*;
 import com.itextpdf.layout.borders.*;
-
 import javax.swing.table.*;
 public class DesignationModel extends AbstractTableModel
 {
@@ -108,7 +107,6 @@ BLException blException=new BLException();
 blException.setGenericException("Inavlid designation :"+designation.getTitle());
 throw blException;
 }
-
 public int indexOfTitle(String title,boolean partialLeftSearch) throws BLException
 {
 Iterator<DesignationInterface> iterator=this.designations.iterator();
